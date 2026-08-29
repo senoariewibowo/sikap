@@ -446,8 +446,12 @@ class TelurKeluarController extends Controller
             return back()->with('error', 'TTD sudah terisi.');
         }
 
-        if ($posisi === 'pengirim' && !$user->hasAnyRole(['petugas_kandang', 'super_admin'])) abort(403);
-        if ($posisi === 'mengetahui' && !$user->hasRole('super_admin')) abort(403);
+        if ($posisi === 'pengirim' && !$user->hasRole('super_admin')) {
+            if (!$user->hasRole('petugas_gudang') || $user->gudang_id != $stokTelur->gudang_id) abort(403);
+        }
+        if ($posisi === 'mengetahui' && !$user->hasRole('super_admin')) {
+            if (!$user->hasRole('driver') || $user->name != $stokTelur->driver) abort(403);
+        }
 
         $update = [$field => $user->id, $field . '_at' => now()];
         $sig = $request->get('signature');

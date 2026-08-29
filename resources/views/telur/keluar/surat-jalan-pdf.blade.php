@@ -21,11 +21,15 @@ table.data th{background:#f0f0f0;font-size:10px;text-transform:uppercase}
 table.data td{font-size:11px}
 .detail{width:100%;margin-bottom:14px}
 .detail td{vertical-align:top;padding:4px 10px;width:50%}
-.ttd{width:100%;margin-top:40px;text-align:center}
-.ttd td{width:33%;padding:10px;vertical-align:bottom;height:120px}
-.ttd .name{border-top:1px solid #333;padding-top:6px;margin-top:6px;font-size:11px}
-.ttd .role{font-size:9px;color:#888}
-.ttd img{max-height:50px;display:block;margin:0 auto 4px}
+.ttd{width:100%;margin-top:40px;border-collapse:collapse}
+.ttd-cell{width:50%;padding:10px;vertical-align:top;text-align:center}
+.ttd-label{font-weight:bold;font-size:12px;margin-bottom:4px}
+.ttd-box{position:relative;padding:8px;height:140px;text-align:center}
+.ttd-sign-block{position:absolute;bottom:8px;left:8px;right:8px;text-align:center}
+.ttd-line{border-top:1px dashed #333;padding-top:4px;margin-bottom:2px;font-size:0}
+.ttd-name-line{border-top:1px solid #333;padding-top:4px;margin-bottom:2px;font-size:11px}
+.ttd-role{font-size:9px;color:#888}
+.ttd img{max-height:70px;display:block;margin:0 auto 4px}
 </style>
 </head>
 <body>
@@ -55,20 +59,22 @@ table.data td{font-size:11px}
 <div class="box">
     <p class="title">Driver / Pengemudi</p>
     <p><strong>{{ $stokTelur->driver ?: '-' }}</strong></p>
+    <p style="margin-top:6px"><span style="color:#888">Total Peti:</span> <strong>{{ number_format($stokTelur->peti) }} peti</strong></p>
 </div>
 
 <table class="data">
-<thead><tr><th>No</th><th>Kandang Asal</th><th style="text-align:right">Jumlah (butir)</th><th style="text-align:right">Berat (kg)</th></tr></thead>
+<thead><tr><th>No</th><th>Kode Peti</th><th style="text-align:right">Peti</th><th style="text-align:right">Jumlah (butir)</th><th style="text-align:right">Berat (kg)</th></tr></thead>
 <tbody>
 @foreach($stokTelur->details as $i => $d)
 <tr>
     <td>{{ $i + 1 }}</td>
-    <td>{{ $d->sortasiDetail->sortasiTelur->kandang->nama_kandang ?? '-' }}</td>
+    <td>{{ $d->sortasiDetail->kode_peti ?? '-' }}</td>
+    <td style="text-align:right">{{ number_format($d->peti) }}</td>
     <td style="text-align:right">{{ number_format($d->jumlah_butir) }}</td>
     <td style="text-align:right">{{ number_format($d->berat_kg, 1) }}</td>
 </tr>
 @endforeach
-<tr style="font-weight:bold"><td colspan="2">Total</td><td style="text-align:right">{{ number_format($stokTelur->jumlah_butir) }}</td><td style="text-align:right">{{ number_format($stokTelur->berat_kg, 1) }}</td></tr>
+<tr style="font-weight:bold"><td colspan="2">Total</td><td style="text-align:right">{{ number_format($stokTelur->peti) }}</td><td style="text-align:right">{{ number_format($stokTelur->jumlah_butir) }}</td><td style="text-align:right">{{ number_format($stokTelur->berat_kg, 1) }}</td></tr>
 </tbody>
 </table>
 
@@ -81,32 +87,37 @@ table.data td{font-size:11px}
 
 <table class="ttd">
 <tr>
-    <td>
-        <strong>Pengirim</strong>
-        @if($stokTelur->ttdPengirim)
-            @if($stokTelur->ttd_pengirim_img)<img src="{{ $stokTelur->ttd_pengirim_img }}" alt="TTD">@endif
-            <div class="name">{{ $stokTelur->ttdPengirim->name }}</div>
-            <div class="role">{{ \Carbon\Carbon::parse($stokTelur->ttd_pengirim_at)->format('d/m/Y H:i') }}</div>
-        @else
-            <div class="name">___________</div>
-            <div class="role">Petugas</div>
-        @endif
+    <td class="ttd-cell">
+        <div class="ttd-label">Petugas Gudang (Pengirim)</div>
+        <div class="ttd-box">
+            <div class="ttd-sign-block">
+                @if($stokTelur->ttdPengirim)
+                    @if($stokTelur->ttd_pengirim_img)<img src="{{ $stokTelur->ttd_pengirim_img }}" alt="TTD">@endif
+                    <div class="ttd-name-line">{{ $stokTelur->ttdPengirim->name }}</div>
+                    <div class="ttd-role">Petugas Gudang</div>
+                    <div class="ttd-role">{{ \Carbon\Carbon::parse($stokTelur->ttd_pengirim_at)->format('d/m/Y H:i') }}</div>
+                @else
+                    <div class="ttd-line">&nbsp;</div>
+                    <div class="ttd-role">Petugas Gudang</div>
+                @endif
+            </div>
+        </div>
     </td>
-    <td>
-        <strong>Penerima</strong>
-        <div class="name">___________</div>
-        <div class="role">Ttd &amp; Nama</div>
-    </td>
-    <td>
-        <strong>Mengetahui</strong>
-        @if($stokTelur->ttdMengetahui)
-            @if($stokTelur->ttd_mengetahui_img)<img src="{{ $stokTelur->ttd_mengetahui_img }}" alt="TTD">@endif
-            <div class="name">{{ $stokTelur->ttdMengetahui->name }}</div>
-            <div class="role">{{ \Carbon\Carbon::parse($stokTelur->ttd_mengetahui_at)->format('d/m/Y H:i') }}</div>
-        @else
-            <div class="name">___________</div>
-            <div class="role">Manajer</div>
-        @endif
+    <td class="ttd-cell">
+        <div class="ttd-label">Driver (Mengetahui)</div>
+        <div class="ttd-box">
+            <div class="ttd-sign-block">
+                @if($stokTelur->ttdMengetahui)
+                    @if($stokTelur->ttd_mengetahui_img)<img src="{{ $stokTelur->ttd_mengetahui_img }}" alt="TTD">@endif
+                    <div class="ttd-name-line">{{ $stokTelur->ttdMengetahui->name }}</div>
+                    <div class="ttd-role">Driver</div>
+                    <div class="ttd-role">{{ \Carbon\Carbon::parse($stokTelur->ttd_mengetahui_at)->format('d/m/Y H:i') }}</div>
+                @else
+                    <div class="ttd-line">&nbsp;</div>
+                    <div class="ttd-role">Driver</div>
+                @endif
+            </div>
+        </div>
     </td>
 </tr>
 </table>

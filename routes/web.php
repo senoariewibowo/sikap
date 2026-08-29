@@ -3,17 +3,20 @@
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\GudangController;
 use App\Http\Controllers\HargaTelurController;
-use App\Http\Controllers\JenisPakanController;
 use App\Http\Controllers\KandangController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\KategoriPengeluaranController;
 use App\Http\Controllers\ObatController;
 use App\Http\Controllers\ObatPemakaianController;
 use App\Http\Controllers\ObatStokController;
+use App\Http\Controllers\BahanPakanController;
+use App\Http\Controllers\BahanPakanStokController;
 use App\Http\Controllers\PakanController;
 use App\Http\Controllers\PakanDistribusiController;
 use App\Http\Controllers\PakanStokController;
 use App\Http\Controllers\PemakaianPakanController;
+use App\Http\Controllers\ProduksiPakanController;
+use App\Http\Controllers\ResepPakanController;
 use App\Http\Controllers\PengeluaranController;
 use App\Http\Controllers\PenjualanController;
 use App\Http\Controllers\PopulasiAyamController;
@@ -367,6 +370,26 @@ Route::middleware(['auth','verified','role:super_admin,petugas_gudang'])->group(
     Route::delete('/eceran/transaksi/{id}', [TransaksiEceranController::class, 'destroy'])->name('eceran.transaksi.destroy');
 });
 
+Route::middleware(['auth', 'verified', 'role:super_admin,petugas_gudang'])->group(function () {
+    Route::resource('pakan/bahan', BahanPakanController::class)->except(['show'])->names('pakan.bahan');
+
+    Route::get('/pakan/bahan/stok', [BahanPakanStokController::class, 'index'])->name('pakan.bahan.stok.index');
+    Route::get('/pakan/bahan/stok/create', [BahanPakanStokController::class, 'create'])->name('pakan.bahan.stok.create');
+    Route::post('/pakan/bahan/stok', [BahanPakanStokController::class, 'store'])->name('pakan.bahan.stok.store');
+    Route::get('/pakan/bahan/stok/{stok}/riwayat', [BahanPakanStokController::class, 'riwayat'])->name('pakan.bahan.stok.riwayat');
+
+    Route::resource('pakan/resep', ResepPakanController::class)->except(['show'])->names('pakan.resep');
+    Route::get('/pakan/resep/by-pakan/{pakan}', [ResepPakanController::class, 'ajaxResepByPakan'])->name('pakan.resep.by-pakan');
+
+    Route::get('/pakan/produksi', [ProduksiPakanController::class, 'index'])->name('pakan.produksi.index');
+    Route::get('/pakan/produksi/create', [ProduksiPakanController::class, 'create'])->name('pakan.produksi.create');
+    Route::post('/pakan/produksi', [ProduksiPakanController::class, 'store'])->name('pakan.produksi.store');
+    Route::get('/pakan/produksi/{produksi}', [ProduksiPakanController::class, 'show'])->name('pakan.produksi.show');
+    Route::delete('/pakan/produksi/{produksi}', [ProduksiPakanController::class, 'destroy'])->name('pakan.produksi.destroy');
+
+    Route::resource('pakan', PakanController::class);
+});
+
 Route::middleware(['auth', 'verified', 'role:super_admin'])->group(function () {
     Route::resource('gudang', GudangController::class);
     Route::resource('users', UserController::class)->except(['show']);
@@ -385,7 +408,6 @@ Route::middleware(['auth', 'verified', 'role:super_admin'])->group(function () {
     Route::put('/harga/{harga}', [HargaTelurController::class, 'update'])->name('harga.update');
     Route::delete('/harga/{harga}', [HargaTelurController::class, 'destroy'])->name('harga.destroy');
 
-    Route::resource('pakan', PakanController::class);
     Route::resource('obat', ObatController::class);
 
     Route::prefix('keuangan')->name('keuangan.')->group(function () {

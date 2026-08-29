@@ -14,6 +14,7 @@ class StorePakanRequest extends FormRequest
             'nama' => 'required|string|max:100',
             'satuan' => 'required|string|max:20',
             'harga' => 'nullable|numeric|min:0',
+            'harga_pokok' => 'nullable|numeric|min:0',
             'stok_minimal' => 'nullable|numeric|min:0',
             'status' => 'required|in:aktif,nonaktif',
         ];

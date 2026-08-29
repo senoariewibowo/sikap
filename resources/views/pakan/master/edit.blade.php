@@ -16,8 +16,8 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <x-input-label for="kode" :value="'Kode (opsional)'" />
-                    <x-text-input id="kode" name="kode" class="block mt-1 w-full" :value="old('kode', $pakan->kode)" />
+                    <x-input-label for="kode" :value="'Kode'" />
+                    <x-text-input id="kode" name="kode" class="block mt-1 w-full bg-gray-100 cursor-not-allowed" :value="old('kode', $pakan->kode)" readonly />
                     <x-input-error :messages="$errors->get('kode')" class="mt-2" />
                 </div>
                 <div>
@@ -39,9 +39,15 @@
                     <x-input-error :messages="$errors->get('satuan')" class="mt-2" />
                 </div>
                 <div>
-                    <x-input-label for="harga" :value="'Harga per Satuan (Rp)'" />
+                    <x-input-label for="harga" :value="'Harga Jual per Satuan (Rp)'" />
                     <x-text-input id="harga" name="harga" type="number" step="0.01" class="block mt-1 w-full" :value="old('harga', $pakan->harga)" />
                     <x-input-error :messages="$errors->get('harga')" class="mt-2" />
+                </div>
+                <div>
+                    <x-input-label for="harga_pokok" :value="'Harga Pokok (HPP) per Satuan (Rp)'" />
+                    <x-text-input id="harga_pokok" name="harga_pokok" type="number" step="0.01" class="block mt-1 w-full" :value="old('harga_pokok', $pakan->harga_pokok)" />
+                    <p class="text-xs text-gray-500 mt-1">Otomatis dihitung dari produksi. Bisa diisi manual untuk pakan yang dibeli.</p>
+                    <x-input-error :messages="$errors->get('harga_pokok')" class="mt-2" />
                 </div>
                 <div>
                     <x-input-label for="stok_minimal" :value="'Stok Minimal'" />

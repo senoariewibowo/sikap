@@ -22,23 +22,27 @@ class PakanController extends Controller
             ->orderBy('nama')
             ->paginate(10)->withQueryString();
 
-        return view('pakan.index', compact('pakans', 'gudangs', 'gudangId', 'search'));
+        return view('pakan.master.index', compact('pakans', 'gudangs', 'gudangId', 'search'));
     }
 
     public function create()
     {
-        return view('pakan.create');
+        $nextKode = 'PAK-' . str_pad(Pakan::max('id') + 1, 3, '0', STR_PAD_LEFT);
+        return view('pakan.master.create', compact('nextKode'));
     }
 
     public function store(StorePakanRequest $request)
     {
-        Pakan::create($request->validated());
+        $data = $request->validated();
+        $data['kode'] = 'PAK-' . str_pad(Pakan::max('id') + 1, 3, '0', STR_PAD_LEFT);
+
+        Pakan::create($data);
         return redirect()->route('pakan.index')->with('success', 'Pakan berhasil ditambahkan.');
     }
 
     public function edit(Pakan $pakan)
     {
-        return view('pakan.edit', compact('pakan'));
+        return view('pakan.master.edit', compact('pakan'));
     }
 
     public function update(StorePakanRequest $request, Pakan $pakan)

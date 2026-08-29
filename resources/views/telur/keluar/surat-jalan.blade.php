@@ -46,16 +46,23 @@
                     </div>
                 </div>
 
-                <div class="mb-6">
-                    <p class="text-gray-500 text-xs uppercase tracking-wider font-semibold mb-1">Driver / Pengemudi</p>
-                    <p class="text-sm font-medium">{{ $stokTelur->driver ?: '-' }}</p>
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <p class="text-gray-500 text-xs uppercase tracking-wider font-semibold mb-1">Driver / Pengemudi</p>
+                        <p class="text-sm font-medium">{{ $stokTelur->driver ?: '-' }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-gray-500 text-xs uppercase tracking-wider font-semibold mb-1">Total Peti</p>
+                        <p class="text-lg font-bold">{{ number_format($stokTelur->peti) }} peti</p>
+                    </div>
                 </div>
 
                 <table class="w-full mb-6 text-sm border-collapse">
                     <thead>
                         <tr class="border-y-2 border-gray-800">
                             <th class="py-2 text-left">No</th>
-                            <th class="py-2 text-left">Kandang Asal</th>
+                            <th class="py-2 text-left">Kode Peti</th>
+                            <th class="py-2 text-right">Peti</th>
                             <th class="py-2 text-right">Jumlah (butir)</th>
                             <th class="py-2 text-right">Berat (kg)</th>
                         </tr>
@@ -64,13 +71,15 @@
                         @foreach($stokTelur->details as $i => $d)
                         <tr class="border-b">
                             <td class="py-2">{{ $i + 1 }}</td>
-                            <td class="py-2">{{ $d->sortasiDetail->sortasiTelur->kandang->nama_kandang ?? '-' }}</td>
+                            <td class="py-2">{{ $d->sortasiDetail->kode_peti ?? '-' }}</td>
+                            <td class="py-2 text-right">{{ number_format($d->peti) }}</td>
                             <td class="py-2 text-right">{{ number_format($d->jumlah_butir) }}</td>
                             <td class="py-2 text-right">{{ number_format($d->berat_kg, 1) }}</td>
                         </tr>
                         @endforeach
                         <tr class="border-b-2 border-gray-800 font-semibold">
                             <td class="py-3" colspan="2">Total</td>
+                            <td class="py-3 text-right">{{ number_format($stokTelur->peti) }}</td>
                             <td class="py-3 text-right">{{ number_format($stokTelur->jumlah_butir) }}</td>
                             <td class="py-3 text-right">{{ number_format($stokTelur->berat_kg, 1) }}</td>
                         </tr>
@@ -82,14 +91,15 @@
                     <p class="text-sm">{{ $stokTelur->keterangan ?: '-' }}</p>
                 </div>
 
-                <div class="grid grid-cols-3 gap-8 mt-16 pt-4 text-center text-sm">
+                <div class="grid grid-cols-2 gap-8 mt-16 pt-4 text-center text-sm">
                     <div class="flex flex-col justify-end min-h-[140px]">
-                        <p class="font-semibold mb-2">Pengirim,</p>
+                        <p class="font-semibold mb-2">Petugas Gudang (Pengirim),</p>
                         @if($stokTelur->ttdPengirim)
                             <img src="{{ $stokTelur->ttd_pengirim_img }}" class="mx-auto h-12 mb-1" alt="TTD">
                             <p class="text-xs font-medium">{{ $stokTelur->ttdPengirim->name }}</p>
+                            <p class="text-xs text-gray-500">Petugas Gudang</p>
                             <p class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($stokTelur->ttd_pengirim_at)->format('d/m/Y H:i') }}</p>
-                        @elseif(auth()->user()->hasAnyRole(['petugas_kandang','super_admin']))
+                        @elseif(auth()->user()->hasRole('super_admin') || (auth()->user()->hasRole('petugas_gudang') && auth()->user()->gudang_id == $stokTelur->gudang_id))
                             <form method="POST" action="{{ route('telur.keluar.ttd', $stokTelur) }}" class="no-print" onsubmit="return submitTTD(this, 'pengirim')">
                                 @csrf
                                 <input type="hidden" name="posisi" value="pengirim">
@@ -102,20 +112,17 @@
                             </form>
                         @else
                             <p class="border-t border-gray-400 pt-2">___________</p>
+                            <p class="text-xs text-gray-500">Petugas Gudang</p>
                         @endif
                     </div>
                     <div class="flex flex-col justify-end min-h-[140px]">
-                        <p class="font-semibold mb-2">Penerima,</p>
-                        <p class="border-t border-gray-400 pt-2">___________</p>
-                        <p class="text-xs text-gray-500">Ttd & Nama</p>
-                    </div>
-                    <div class="flex flex-col justify-end min-h-[140px]">
-                        <p class="font-semibold mb-2">Mengetahui,</p>
+                        <p class="font-semibold mb-2">Driver (Mengetahui),</p>
                         @if($stokTelur->ttdMengetahui)
                             <img src="{{ $stokTelur->ttd_mengetahui_img }}" class="mx-auto h-12 mb-1" alt="TTD">
                             <p class="text-xs font-medium">{{ $stokTelur->ttdMengetahui->name }}</p>
+                            <p class="text-xs text-gray-500">Driver</p>
                             <p class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($stokTelur->ttd_mengetahui_at)->format('d/m/Y H:i') }}</p>
-                        @elseif(auth()->user()->hasRole('super_admin'))
+                        @elseif(auth()->user()->hasRole('super_admin') || (auth()->user()->hasRole('driver') && auth()->user()->name == $stokTelur->driver))
                             <form method="POST" action="{{ route('telur.keluar.ttd', $stokTelur) }}" class="no-print" onsubmit="return submitTTD(this, 'mengetahui')">
                                 @csrf
                                 <input type="hidden" name="posisi" value="mengetahui">
@@ -128,6 +135,7 @@
                             </form>
                         @else
                             <p class="border-t border-gray-400 pt-2">___________</p>
+                            <p class="text-xs text-gray-500">Driver</p>
                         @endif
                     </div>
                 </div>

@@ -14,6 +14,7 @@ class Pakan extends Model
         'nama',
         'satuan',
         'harga',
+        'harga_pokok',
         'stok_minimal',
         'status',
     ];
@@ -31,6 +32,16 @@ class Pakan extends Model
     public function pemakaian(): HasMany
     {
         return $this->hasMany(PakanPemakaian::class);
+    }
+
+    public function resepPakan(): HasMany
+    {
+        return $this->hasMany(ResepPakan::class);
+    }
+
+    public function produksiPakan(): HasMany
+    {
+        return $this->hasMany(ProduksiPakan::class);
     }
 
     public function stokGudang(int $gudangId): float
