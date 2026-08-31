@@ -117,9 +117,58 @@
                             </div>
                         </div>
                     </div>
-                @else
-                    <p class="text-sm text-gray-400">Karyawan ini belum memiliki akun login.</p>
-                @endif
+                 @else
+        <p class="text-sm text-gray-400 mb-3">Karyawan ini belum memiliki akun login.</p>
+
+        <label class="inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="buat_akun" name="buat_akun" value="1" {{ old('buat_akun') ? 'checked' : '' }} class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+            <span class="ml-2 text-sm font-medium text-gray-700">Buat akun login untuk karyawan ini</span>
+        </label>
+
+        <div id="akunFields" class="mt-4 space-y-4 {{ old('buat_akun') ? '' : 'hidden' }}">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <x-input-label for="email" :value="'Email'" />
+                    <x-text-input id="email" name="email" type="email" class="block mt-1 w-full" :value="old('email')" />
+                    <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                </div>
+                <div>
+                    <x-input-label for="role_id" :value="'Role'" />
+                    <select id="role_id" name="role_id" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm text-sm">
+                        <option value="">Pilih Role</option>
+                        @foreach($roles as $role)
+                            <option value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'selected' : '' }}>
+                                {{ ucfirst(str_replace('_', ' ', $role->nama_role)) }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <x-input-error :messages="$errors->get('role_id')" class="mt-2" />
+                </div>
+            </div>
+
+            <div id="gudang_field_new" class="hidden">
+                <x-input-label for="gudang_id" :value="'Gudang (untuk petugas gudang)'" />
+                <select id="gudang_id" name="gudang_id" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm text-sm">
+                    <option value="">Pilih Gudang</option>
+                    @foreach($gudangs as $g)
+                        <option value="{{ $g->id }}" {{ old('gudang_id') == $g->id ? 'selected' : '' }}>{{ $g->nama_gudang }}</option>
+                    @endforeach
+                </select>
+                <x-input-error :messages="$errors->get('gudang_id')" class="mt-2" />
+            </div>
+
+            <div>
+                <x-input-label for="password" :value="'Password'" />
+                <x-text-input id="password" name="password" type="password" class="block mt-1 w-full" />
+                <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                <p class="text-xs text-gray-400 mt-1">Minimal 8 karakter.</p>
+            </div>
+            <div>
+                <x-input-label for="password_confirmation" :value="'Konfirmasi Password'" />
+                <x-text-input id="password_confirmation" name="password_confirmation" type="password" class="block mt-1 w-full" />
+            </div>
+        </div>
+    @endif
             </div>
 
             <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
@@ -136,6 +185,46 @@
 <script>
 document.getElementById('reset_password').addEventListener('change', function() {
     document.getElementById('passwordFields').classList.toggle('hidden', !this.checked);
+});
+</script>
+@else
+<script>
+document.getElementById('buat_akun').addEventListener('change', function() {
+    document.getElementById('akunFields').classList.toggle('hidden', !this.checked);
+});
+
+var petugasRoleId = '{{ \App\Models\Role::where("nama_role", "petugas")->value("id") }}';
+var petugasGudangRoleId = '{{ \App\Models\Role::where("nama_role", "petugas_gudang")->value("id") }}';
+var viewerRoleId = '{{ \App\Models\Role::where("nama_role", "viewer")->value("id") }}';
+
+var roleSelect = document.getElementById('role_id');
+var gudangField = document.getElementById('gudang_field_new');
+var gudangSelect = document.getElementById('gudang_id');
+
+function toggleGudangFieldEdit() {
+    if (roleSelect.value === petugasGudangRoleId) {
+        gudangField.classList.remove('hidden');
+    } else {
+        gudangField.classList.add('hidden');
+        gudangSelect.value = '';
+    }
+}
+
+roleSelect.addEventListener('change', toggleGudangFieldEdit);
+
+var jabatanRoleMap = {
+    'Manajer Kandang': petugasRoleId,
+    'Petugas Kandang': petugasRoleId,
+    'Teknisi': petugasRoleId,
+    'Admin Gudang': petugasGudangRoleId,
+    'Petugas Gudang': petugasGudangRoleId,
+    'Lainnya': viewerRoleId
+};
+
+document.getElementById('jabatan').addEventListener('change', function() {
+    var roleId = jabatanRoleMap[this.value] || '';
+    roleSelect.value = roleId;
+    roleSelect.dispatchEvent(new Event('change'));
 });
 </script>
 @endif

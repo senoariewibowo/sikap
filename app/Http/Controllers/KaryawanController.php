@@ -85,34 +85,54 @@ class KaryawanController extends Controller
     }
 
     public function update(UpdateKaryawanRequest $request, Karyawan $karyawan)
-    {
-        $data = $request->validated();
-        unset($data['reset_password'], $data['password'], $data['password_confirmation'], $data['gudang_id']);
+{
+    $data = $request->validated();
+    unset(
+        $data['reset_password'],
+        $data['password'],
+        $data['password_confirmation'],
+        $data['gudang_id'],
+        $data['buat_akun'],
+        $data['email'],
+        $data['role_id'],
+    );
 
-        if ($request->hasFile('foto')) {
-            if ($karyawan->foto) {
-                Storage::disk('public')->delete($karyawan->foto);
-            }
-            $data['foto'] = $request->file('foto')->store('karyawan', 'public');
+    if ($request->hasFile('foto')) {
+        if ($karyawan->foto) {
+            Storage::disk('public')->delete($karyawan->foto);
         }
+        $data['foto'] = $request->file('foto')->store('karyawan', 'public');
+    }
 
-        $karyawan->update($data);
+    $karyawan->update($data);
 
-        if ($request->reset_password && $request->filled('password') && $karyawan->user) {
-            $karyawan->user->update([
-                'password' => Hash::make($request->password),
-            ]);
+    $msg = 'Data karyawan berhasil diperbarui.';
+
+    if (!$karyawan->user && $request->buat_akun) {
+        // Karyawan belum punya akun -> buat baru
+        $user = User::create([
+            'name' => $karyawan->nama,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role_id' => $request->role_id,
+            'karyawan_id' => $karyawan->id,
+            'gudang_id' => $request->gudang_id,
+        ]);
+        $msg = 'Data karyawan berhasil diperbarui + akun login dibuat (' . $user->email . ').';
+    } elseif ($karyawan->user) {
+        // Karyawan sudah punya akun -> update seperlunya
+        if ($request->reset_password && $request->filled('password')) {
+            $karyawan->user->update(['password' => Hash::make($request->password)]);
             $msg = 'Data karyawan + password akun berhasil diperbarui.';
-        } else {
-            $msg = 'Data karyawan berhasil diperbarui.';
         }
 
-        if ($karyawan->user && $request->filled('gudang_id')) {
+        if ($request->filled('gudang_id')) {
             $karyawan->user->update(['gudang_id' => $request->gudang_id]);
         }
-
-        return redirect()->route('karyawan.index')->with('success', $msg);
     }
+
+    return redirect()->route('karyawan.index')->with('success', $msg);
+}
 
     public function destroy(Karyawan $karyawan)
     {
