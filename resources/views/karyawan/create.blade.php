@@ -101,33 +101,39 @@
                             <x-input-error :messages="$errors->get('role_id')" class="mt-2" />
                         </div>
                     </div>
-                    <div id="gudang_field" class="hidden mt-4">
-                        <x-input-label for="gudang_id" :value="'Gudang (untuk petugas gudang)'" />
-                        <select id="gudang_id" name="gudang_id" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm text-sm">
-                            <option value="">Pilih Gudang</option>
-                            @foreach($gudangs as $g)
-                                <option value="{{ $g->id }}" {{ old('gudang_id') == $g->id ? 'selected' : '' }}>{{ $g->nama_gudang }}</option>
-                            @endforeach
-                        </select>
-                        <x-input-error :messages="$errors->get('gudang_id')" class="mt-2" />
+                    <div>
+                        <x-input-label for="password" :value="'Password'" />
+                        <div class="relative mt-1">
+                            <x-text-input id="password" name="password" type="password" class="block w-full pr-10" />
+                            <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600 focus:outline-none">
+                                <svg id="eyeIconShow" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <svg id="eyeIconHide" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.774 3.162 10.066 7.5a10.522 10.522 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                                </svg>
+                            </button>
+                        </div>
+                        <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                        <p class="text-xs text-gray-400 mt-1">Minimal 8 karakter.</p>
                     </div>
                     <div>
-                    <x-input-label for="password" :value="'Password'" />
-                    <div class="relative mt-1">
-                        <x-text-input id="password" name="password" type="password" class="block w-full pr-10" />
-                        <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600 focus:outline-none">
-                            <svg id="eyeIconShow" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            <svg id="eyeIconHide" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.774 3.162 10.066 7.5a10.522 10.522 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
-                            </svg>
-                        </button>
+                        <x-input-label for="password_confirmation" :value="'Konfirmasi Password'" />
+                        <div class="relative mt-1">
+                            <x-text-input id="password_confirmation" name="password_confirmation" type="password" class="block w-full pr-10" />
+                            <button type="button" id="togglePasswordConfirmation" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600 focus:outline-none">
+                                <svg id="eyeIconShowConfirm" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <svg id="eyeIconHideConfirm" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.774 3.162 10.066 7.5a10.522 10.522 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                                </svg>
+                            </button>
+                        </div>
+                        <p id="passwordMismatchError" class="hidden text-xs text-red-500 mt-1">Password dan konfirmasi password tidak sama.</p>
                     </div>
-                    <x-input-error :messages="$errors->get('password')" class="mt-2" />
-                    <p class="text-xs text-gray-400 mt-1">Minimal 8 karakter.</p>
-                </div>
                 </div>
             </div>
 
@@ -151,19 +157,6 @@ var petugasGudangRoleId = '{{ \App\Models\Role::where("nama_role", "petugas_guda
 var viewerRoleId = '{{ \App\Models\Role::where("nama_role", "viewer")->value("id") }}';
 
 var roleSelect = document.getElementById('role_id');
-var gudangField = document.getElementById('gudang_field');
-var gudangSelect = document.getElementById('gudang_id');
-
-function toggleGudangField() {
-    if (roleSelect.value === petugasGudangRoleId) {
-        gudangField.classList.remove('hidden');
-    } else {
-        gudangField.classList.add('hidden');
-        gudangSelect.value = '';
-    }
-}
-
-roleSelect.addEventListener('change', toggleGudangField);
 
 var jabatanRoleMap = {
     'Manajer Kandang': petugasRoleId,
@@ -177,7 +170,6 @@ var jabatanRoleMap = {
 document.getElementById('jabatan').addEventListener('change', function() {
     var roleId = jabatanRoleMap[this.value] || '';
     roleSelect.value = roleId;
-    roleSelect.dispatchEvent(new Event('change'));
 });
 
 var togglePassword = document.getElementById('togglePassword');
@@ -190,6 +182,38 @@ togglePassword.addEventListener('click', function() {
     passwordInput.type = isPassword ? 'text' : 'password';
     eyeShow.classList.toggle('hidden', isPassword);
     eyeHide.classList.toggle('hidden', !isPassword);
+});
+
+var togglePasswordConfirmation = document.getElementById('togglePasswordConfirmation');
+var passwordConfirmInput = document.getElementById('password_confirmation');
+var eyeShowConfirm = document.getElementById('eyeIconShowConfirm');
+var eyeHideConfirm = document.getElementById('eyeIconHideConfirm');
+
+togglePasswordConfirmation.addEventListener('click', function() {
+    var isPassword = passwordConfirmInput.type === 'password';
+    passwordConfirmInput.type = isPassword ? 'text' : 'password';
+    eyeShowConfirm.classList.toggle('hidden', isPassword);
+    eyeHideConfirm.classList.toggle('hidden', !isPassword);
+});
+
+var passwordMismatchError = document.getElementById('passwordMismatchError');
+
+function checkPasswordMatch() {
+    if (passwordConfirmInput.value.length > 0 && passwordInput.value !== passwordConfirmInput.value) {
+        passwordMismatchError.classList.remove('hidden');
+    } else {
+        passwordMismatchError.classList.add('hidden');
+    }
+}
+
+passwordInput.addEventListener('input', checkPasswordMatch);
+passwordConfirmInput.addEventListener('input', checkPasswordMatch);
+
+document.querySelector('form').addEventListener('submit', function(e) {
+    if (document.getElementById('buat_akun').checked && passwordInput.value !== passwordConfirmInput.value) {
+        e.preventDefault();
+        checkPasswordMatch();
+    }
 });
 </script>
 @endsection

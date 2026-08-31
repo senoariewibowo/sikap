@@ -125,10 +125,6 @@ class KaryawanController extends Controller
             $karyawan->user->update(['password' => Hash::make($request->password)]);
             $msg = 'Data karyawan + password akun berhasil diperbarui.';
         }
-
-        if ($request->filled('gudang_id')) {
-            $karyawan->user->update(['gudang_id' => $request->gudang_id]);
-        }
     }
 
     return redirect()->route('karyawan.index')->with('success', $msg);

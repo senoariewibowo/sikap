@@ -24,7 +24,7 @@ class StoreKaryawanRequest extends FormRequest
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'buat_akun' => 'nullable|in:1',
             'email' => 'required_if:buat_akun,1|nullable|string|email|max:255|unique:users,email',
-            'password' => 'required_if:buat_akun,1|nullable|string|min:8',
+            'password' => 'required_if:buat_akun,1|nullable|string|min:8|confirmed',
             'role_id' => 'required_if:buat_akun,1|nullable|exists:roles,id',
             'gudang_id' => 'nullable|exists:gudang,id',
         ];
