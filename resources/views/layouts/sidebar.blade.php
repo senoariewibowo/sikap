@@ -26,6 +26,30 @@
             <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
             <span class="nav-text">Gudang</span>
         </x-sidebar-link>
+
+        @if(session('app_mode') === 'kasir')
+        <div class="pt-4"><p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider nav-text">Kasir</p></div>
+        <x-sidebar-link :href="route('kasir.dashboard')" :active="request()->routeIs('kasir.dashboard')">
+            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m0 0h2m2 0h2a2 2 0 002-2v-6m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            <span class="nav-text">Dashboard Kasir</span>
+        </x-sidebar-link>
+        <x-sidebar-link :href="route('kasir.pos')" :active="request()->routeIs('kasir.pos')">
+            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 100-4 2 2 0 000 4z"/></svg>
+            <span class="nav-text">Transaksi</span>
+        </x-sidebar-link>
+        <x-sidebar-link :href="route('kasir.index')" :active="request()->routeIs('kasir.index') || request()->routeIs('kasir.pelunasan')">
+            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span class="nav-text">Riwayat Transaksi</span>
+        </x-sidebar-link>
+        <x-sidebar-link :href="route('kasir.product.index')" :active="request()->routeIs('kasir.product.*')">
+            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            <span class="nav-text">Produk</span>
+        </x-sidebar-link>
+        <x-sidebar-link :href="route('kasir.group.index')" :active="request()->routeIs('kasir.group.*')">
+            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+            <span class="nav-text">Grup Produk</span>
+        </x-sidebar-link>
+        @endif
         @endif
 
         @if(!auth()->user()->hasRole('driver'))

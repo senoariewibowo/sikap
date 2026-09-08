@@ -30,13 +30,38 @@ use App\Http\Controllers\StokTelurEceranController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\TransaksiEceranController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ModeController;
+use App\Http\Controllers\KasirController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductGroupController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn() => redirect()->route('dashboard'))->middleware('auth');
 
+Route::middleware(['auth', 'verified', 'role:super_admin'])->group(function () {
+    Route::post('/mode/switch', [ModeController::class, 'switch'])->name('mode.switch');
+
+    Route::get('/kasir', [KasirController::class, 'pos'])->name('kasir.pos');
+    Route::get('/kasir/dashboard', [KasirController::class, 'dashboard'])->name('kasir.dashboard');
+    Route::get('/kasir/products-json', [KasirController::class, 'productsJson'])->name('kasir.products-json');
+    Route::get('/kasir/product/search', [KasirController::class, 'search'])->name('kasir.product.search');
+    Route::post('/kasir/transaksi', [KasirController::class, 'store'])->name('kasir.store');
+    Route::post('/kasir/product/{product}/prices', [KasirController::class, 'updatePrices'])->name('kasir.product.prices');
+    Route::get('/kasir/riwayat', [KasirController::class, 'index'])->name('kasir.index');
+    Route::post('/kasir/riwayat/{id}/pelunasan', [KasirController::class, 'pelunasan'])->name('kasir.pelunasan');
+    Route::get('/kasir/struk/{id}', [KasirController::class, 'struk'])->name('kasir.struk');
+    Route::delete('/kasir/riwayat/{id}', [KasirController::class, 'destroy'])->name('kasir.destroy');
+
+    Route::resource('kasir/group', ProductGroupController::class)->except(['show'])->names('kasir.group');
+    Route::resource('kasir/product', ProductController::class)->except(['show'])->names('kasir.product');
+});
+
 Route::middleware(['auth', 'verified', 'role:super_admin,petugas_kandang,petugas_gudang,viewer,driver'])->group(function () {
     Route::get('/dashboard', function (\Illuminate\Http\Request $request) {
         $user = auth()->user();
+        if ($user->hasRole('super_admin') && session('app_mode') === 'kasir') {
+            return redirect()->route('kasir.pos');
+        }
         $kandangIds = $user->kandangIds();
         $kandangQuery = !empty($kandangIds) && !$user->hasRole('super_admin')
             ? \App\Models\Kandang::whereIn('id', $kandangIds)
@@ -74,6 +99,16 @@ Route::middleware(['auth', 'verified', 'role:super_admin,petugas_kandang,petugas
             ->selectRaw('SUM(total_harga - dp) as sisa')->value('sisa') ?? 0;
 
         $pengeluaran = (float) (\App\Models\Pengeluaran::whereBetween('tanggal', [$dari, $sampai])->sum('jumlah') ?? 0);
+
+        $kasirOmzet = 0; $kasirOmzetTotal = 0; $kasirRecent = collect();
+        if ($user->hasRole('super_admin')) {
+            $kasirOmzet = (float) (\App\Models\KasirTransaksi::whereBetween('tanggal', [$dari, $sampai])->sum('total') ?? 0);
+            $kasirOmzetTotal = (float) (\App\Models\KasirTransaksi::sum('total') ?? 0);
+            $kasirRecent = \App\Models\KasirTransaksi::with('details')
+                ->whereBetween('tanggal', [$dari, $sampai])
+                ->orderBy('tanggal', 'desc')->orderBy('id', 'desc')
+                ->limit(5)->get();
+        }
 
         $stokMenipis = \App\Models\JenisPakan::all()->filter(fn($j) => $j->isStokMenipis());
 
@@ -223,6 +258,7 @@ Route::middleware(['auth', 'verified', 'role:super_admin,petugas_kandang,petugas
             'pecah', 'retak', 'kopong', 'sisaProd',
             'karpetTotal', 'petiTotal', 'beratTotal', 'kapasitasTotal', 'masukTotal', 'utilisasi', 'mortalitasRate',
             'omzet', 'omzetTotal', 'butirTerjual', 'piutang', 'pengeluaran',
+            'kasirOmzet', 'kasirOmzetTotal', 'kasirRecent',
             'stokMenipis', 'snapshot',
             'chartPemakaianLabels', 'chartPemakaianDatasets', 'pemakaianTotal',
             'dari', 'sampai', 'days',

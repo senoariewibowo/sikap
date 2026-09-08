@@ -217,7 +217,7 @@
 </div>
 
 @if(auth()->user()->hasRole('super_admin'))
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
     <div class="bg-white rounded-lg shadow p-5 hover:shadow-md transition">
         <div class="flex items-center justify-between">
             <div>
@@ -231,7 +231,6 @@
             </div>
         </div>
     </div>
-    @if(auth()->user()->hasRole('super_admin'))
     <div class="bg-white rounded-lg shadow p-5 hover:shadow-md transition">
         <div class="flex items-center justify-between">
             <div>
@@ -245,8 +244,53 @@
             </div>
         </div>
     </div>
-    @endif
+    <div class="bg-white rounded-lg shadow p-5 hover:shadow-md transition">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-400 uppercase tracking-wider font-semibold">Omzet Kasir</p>
+                <p class="text-2xl font-bold text-indigo-600 mt-1">Rp {{ number_format($kasirOmzet, 0, ',', '.') }}</p>
+                <p class="text-sm text-gray-500 mt-1">Penjualan mode kasir periode ini</p>
+                <p class="text-xs text-gray-400 mt-1">Total semua waktu: <strong class="text-gray-700">Rp {{ number_format($kasirOmzetTotal, 0, ',', '.') }}</strong></p>
+            </div>
+            <div class="p-3 rounded-full bg-indigo-100 text-indigo-600 shrink-0">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg>
+            </div>
+        </div>
+    </div>
 </div>
+
+@if($kasirRecent->isNotEmpty())
+<div class="bg-white rounded-lg shadow mb-6">
+    <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+        <p class="text-sm text-gray-400 uppercase tracking-wider font-semibold">Riwayat Kasir Terbaru</p>
+        <a href="{{ route('kasir.index') }}" class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold">Lihat Semua &rarr;</a>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3">No. Struk</th>
+                    <th class="px-6 py-3">Tanggal</th>
+                    <th class="px-6 py-3">Item</th>
+                    <th class="px-6 py-3 text-right">Total</th>
+                    <th class="px-6 py-3 text-center">Struk</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($kasirRecent as $kt)
+                <tr class="bg-white border-b hover:bg-gray-50">
+                    <td class="px-6 py-3 font-medium text-gray-900">{{ $kt->no_struk }}</td>
+                    <td class="px-6 py-3">{{ \Carbon\Carbon::parse($kt->tanggal)->format('d/m/Y') }}</td>
+                    <td class="px-6 py-3">{{ $kt->details->sum('qty') }}</td>
+                    <td class="px-6 py-3 text-right font-semibold text-gray-800">Rp {{ number_format($kt->total, 0, ',', '.') }}</td>
+                    <td class="px-6 py-3 text-center"><a href="{{ route('kasir.struk', $kt->id) }}" target="_blank" class="text-xs text-indigo-600 hover:underline">Cetak</a></td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endif
 @endif
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">

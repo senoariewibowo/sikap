@@ -16,12 +16,20 @@
     <div class="h-screen bg-gray-100 flex overflow-hidden">
         <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-40 hidden" onclick="document.getElementById('sidebar').classList.add('-translate-x-full'); this.classList.add('hidden');"></div>
 
-        @include('layouts.sidebar')
+        @if(session('app_mode') === 'kasir')
+            @include('layouts.kasir-sidebar')
+        @else
+            @include('layouts.sidebar')
+        @endif
 
         <div id="appContent" class="flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out">
-            @include('layouts.topbar')
+            @if(session('app_mode') === 'kasir')
+                @include('layouts.kasir-topbar')
+            @else
+                @include('layouts.topbar')
+            @endif
 
-            <main class="flex-1 p-6 overflow-y-auto">
+            <main class="flex-1 overflow-y-auto @yield('main-class', 'p-6')">
                 @if (session('success'))
                     <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
                         {{ session('success') }}
