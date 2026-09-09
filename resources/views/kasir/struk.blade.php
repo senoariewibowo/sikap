@@ -11,6 +11,7 @@
         margin: 0 auto;
         font-family: 'Courier New', Courier, monospace;
         font-size: 11px;
+        font-weight: bold;
         line-height: 1.4;
         color: #000;
         background: #fff;
@@ -37,7 +38,7 @@
     <p class="toko center">TOKO ANDI</p>
     <p class="center muted">Jl. Muarabakau <br>Telp: 08137-7780-479</p>
     <hr>
-    <div class="row"><span>{{ $transaksi->no_struk }}</span><span>{{ \Carbon\Carbon::parse($transaksi->tanggal)->format('d/m/Y H:i') }}</span></div>
+    <div class="row"><span>{{ $transaksi->no_struk }}</span><span>{{ $transaksi->created_at->format('d/m/Y H:i') }}</span></div>
     <div class="row"><span>Kasir: {{ $transaksi->user->name ?? '-' }}</span></div>
     @if($transaksi->nama_pembeli)
     <div class="row"><span>Pembeli: {{ $transaksi->nama_pembeli }}</span></div>
@@ -69,7 +70,6 @@
     @endif
     <hr>
     <p class="center">Terima kasih sudah berbelanja</p>
-    <p class="center muted">Barang yang sudah dibeli<br>tidak dapat dikembalikan</p>
 </div>
 
 <button class="btn-print" onclick="window.print()">Cetak Struk</button>
