@@ -48,6 +48,8 @@ Route::middleware(['auth', 'verified', 'role:super_admin'])->group(function () {
     Route::post('/kasir/transaksi', [KasirController::class, 'store'])->name('kasir.store');
     Route::post('/kasir/product/{product}/prices', [KasirController::class, 'updatePrices'])->name('kasir.product.prices');
     Route::get('/kasir/riwayat', [KasirController::class, 'index'])->name('kasir.index');
+    Route::get('/kasir/riwayat/{id}/edit', [KasirController::class, 'edit'])->name('kasir.edit');
+    Route::put('/kasir/riwayat/{id}', [KasirController::class, 'update'])->name('kasir.update');
     Route::post('/kasir/riwayat/{id}/pelunasan', [KasirController::class, 'pelunasan'])->name('kasir.pelunasan');
     Route::get('/kasir/struk/{id}', [KasirController::class, 'struk'])->name('kasir.struk');
     Route::delete('/kasir/riwayat/{id}', [KasirController::class, 'destroy'])->name('kasir.destroy');

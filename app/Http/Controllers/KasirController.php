@@ -316,7 +316,10 @@ class KasirController extends Controller
             ->where('status_pembayaran', 'belum_lunas')
             ->count();
 
-        return view('kasir.index', compact('transaksis', 'search', 'dari', 'sampai', 'totals', 'totalsLunas', 'totalsBelumLunas'));
+        $totalsKembalian = KasirTransaksi::whereBetween('tanggal', [$dari, $sampai])
+            ->sum('kembalian');
+
+        return view('kasir.index', compact('transaksis', 'search', 'dari', 'sampai', 'totals', 'totalsLunas', 'totalsBelumLunas', 'totalsKembalian'));
     }
 
     public function dashboard(Request $request)
@@ -361,6 +364,141 @@ class KasirController extends Controller
         }
 
         return view('kasir.dashboard', compact('dari', 'sampai', 'summary', 'profit', 'labels', 'omzetPerHari', 'profitPerHari'));
+    }
+
+    public function edit($id)
+    {
+        $transaksi = KasirTransaksi::with(['details.product.prices'])->findOrFail($id);
+        $products = Product::with('prices')->where('is_active', true)->get()
+            ->map(fn($p) => [
+                'id' => $p->id,
+                'product_name' => $p->product_name,
+                'barcode' => $p->barcode,
+                'modal' => (float) $p->modal,
+                'prices' => $p->prices->map(fn($pr) => [
+                    'tier' => $pr->tier,
+                    'min_qty' => $pr->min_qty,
+                    'harga' => (float) $pr->harga,
+                ])->values(),
+            ])->values();
+
+        return response()->json([
+            'transaksi' => [
+                'id' => $transaksi->id,
+                'no_struk' => $transaksi->no_struk,
+                'tanggal' => $transaksi->tanggal,
+                'nama_pembeli' => $transaksi->nama_pembeli,
+                'metode_pembayaran' => $transaksi->metode_pembayaran,
+                'status_pembayaran' => $transaksi->status_pembayaran,
+                'dp' => (float) $transaksi->dp,
+                'total' => (float) $transaksi->total,
+                'kekurangan' => (float) $transaksi->kekurangan,
+                'kembalian' => (float) $transaksi->kembalian,
+                'details' => $transaksi->details->map(fn($d) => [
+                    'id' => $d->id,
+                    'product_id' => $d->product_id,
+                    'product_name' => $d->product_name,
+                    'harga' => (float) $d->harga,
+                    'qty' => (int) $d->qty,
+                    'subtotal' => (float) $d->subtotal,
+                    'modal' => (float) $d->modal,
+                    'prices' => $d->product?->prices->map(fn($pr) => [
+                        'tier' => $pr->tier,
+                        'min_qty' => $pr->min_qty,
+                        'harga' => (float) $pr->harga,
+                    ])->values() ?? [],
+                ])->values(),
+            ],
+            'products' => $products,
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'tanggal' => 'required|date',
+            'metode_pembayaran' => 'required|in:tunai,transfer',
+            'status_pembayaran' => 'required|in:lunas,belum_lunas',
+            'dp' => 'required|numeric|min:0',
+            'nama_pembeli' => 'nullable|string|max:100',
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => 'required|integer|exists:products,id',
+            'items.*.qty' => 'required|integer|min:1',
+            'items.*.harga' => 'required|numeric|min:0',
+        ]);
+
+        $transaksi = KasirTransaksi::findOrFail($id);
+
+        $total = 0;
+        $rows = [];
+        foreach ($request->items as $item) {
+            $product = Product::with('prices')->findOrFail($item['product_id']);
+            $qty = (int) $item['qty'];
+            $harga = (float) $item['harga'];
+            $subtotal = round($harga * $qty, 2);
+            $total += $subtotal;
+            $rows[] = [
+                'product_id' => $product->id,
+                'product_name' => $product->product_name,
+                'harga' => $harga,
+                'qty' => $qty,
+                'subtotal' => $subtotal,
+                'modal' => $product->modal ?? 0,
+            ];
+        }
+
+        $total = round($total, 2);
+        $dp = round((float) $request->dp, 2);
+        $metode = $request->metode_pembayaran;
+
+        if ($metode === 'transfer' && $dp > $total) {
+            return response()->json(['success' => false, 'message' => 'Transfer tidak boleh melebihi total.'], 422);
+        }
+
+        if ($request->status_pembayaran === 'lunas') {
+            $status = 'lunas';
+            $kekurangan = 0;
+            $kembalian = $metode === 'tunai' ? round($dp - $total, 2) : 0;
+            if ($kembalian < 0) $kembalian = 0;
+        } else {
+            $status = 'belum_lunas';
+            if ($dp >= $total) {
+                $kekurangan = 0;
+                $kembalian = $metode === 'tunai' ? round($dp - $total, 2) : 0;
+                $status = 'lunas';
+            } else {
+                $kekurangan = round($total - $dp, 2);
+                $kembalian = 0;
+            }
+        }
+
+        DB::transaction(function () use ($transaksi, $request, $total, $dp, $kekurangan, $kembalian, $status, $metode, $rows) {
+            $transaksi->update([
+                'tanggal' => $request->tanggal,
+                'total' => $total,
+                'dp' => $dp,
+                'kekurangan' => $kekurangan,
+                'kembalian' => $kembalian,
+                'metode_pembayaran' => $metode,
+                'status_pembayaran' => $status,
+                'nama_pembeli' => $request->nama_pembeli,
+            ]);
+
+            $transaksi->details()->delete();
+            foreach ($rows as $row) {
+                KasirTransaksiDetail::create([
+                    'kasir_transaction_id' => $transaksi->id,
+                    'product_id' => $row['product_id'],
+                    'product_name' => $row['product_name'],
+                    'harga' => $row['harga'],
+                    'qty' => $row['qty'],
+                    'subtotal' => $row['subtotal'],
+                    'modal' => $row['modal'],
+                ]);
+            }
+        });
+
+        return response()->json(['success' => true, 'message' => 'Transaksi berhasil diperbarui.']);
     }
 
     public function struk($id)
