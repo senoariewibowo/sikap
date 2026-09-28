@@ -293,14 +293,32 @@ class KasirController extends Controller
         $search = $request->get('search');
         $dari = $request->get('dari', now()->startOfMonth()->format('Y-m-d'));
         $sampai = $request->get('sampai', now()->format('Y-m-d'));
+        $sort = $request->get('sort', 'tanggal');
+        $order = strtolower($request->get('order', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $allowed = ['no_struk', 'tanggal', 'nama_pembeli', 'kasir', 'metode_pembayaran', 'status_pembayaran', 'total', 'dp', 'kekurangan', 'kembalian'];
+        if (!in_array($sort, $allowed, true)) {
+            $sort = 'tanggal';
+        }
 
-        $query = KasirTransaksi::with(['details', 'user'])
-            ->orderBy('tanggal', 'desc')->orderBy('id', 'desc');
+        $query = KasirTransaksi::with(['details', 'user']);
 
         if ($search) {
             $query->where('no_struk', 'like', "%{$search}%");
         }
         $query->whereBetween('tanggal', [$dari, $sampai]);
+
+        if ($sort === 'kasir') {
+            $query->leftJoin('users', 'kasir_transactions.user_id', '=', 'users.id')
+                ->orderBy('users.name', $order)
+                ->select('kasir_transactions.*');
+        } else {
+            $query->orderBy($sort, $order);
+            if ($sort !== 'tanggal') {
+                $query->orderBy('tanggal', 'desc')->orderBy('id', 'desc');
+            } elseif ($sort === 'tanggal') {
+                $query->orderBy('id', 'desc');
+            }
+        }
 
         $transaksis = $query->paginate(15)->withQueryString();
 
@@ -319,7 +337,7 @@ class KasirController extends Controller
         $totalsKembalian = KasirTransaksi::whereBetween('tanggal', [$dari, $sampai])
             ->sum('kembalian');
 
-        return view('kasir.index', compact('transaksis', 'search', 'dari', 'sampai', 'totals', 'totalsLunas', 'totalsBelumLunas', 'totalsKembalian'));
+        return view('kasir.index', compact('transaksis', 'search', 'dari', 'sampai', 'sort', 'order', 'totals', 'totalsLunas', 'totalsBelumLunas', 'totalsKembalian'));
     }
 
     public function dashboard(Request $request)

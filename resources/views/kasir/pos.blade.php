@@ -510,7 +510,19 @@
             }
             var d = res.data;
             if (d.struk_url) {
-                window.open(d.struk_url + '?print=1', '_blank');
+                var printFrame = document.createElement('iframe');
+                printFrame.src = d.struk_url + '?print=1';
+                printFrame.style.position = 'fixed';
+                printFrame.style.left = '-9999px';
+                printFrame.style.top = '-9999px';
+                printFrame.style.width = '1px';
+                printFrame.style.height = '1px';
+                printFrame.style.opacity = '0';
+                printFrame.style.border = 'none';
+                document.body.appendChild(printFrame);
+                setTimeout(function () {
+                    if (printFrame.parentNode) printFrame.parentNode.removeChild(printFrame);
+                }, 15000);
             }
             cart = [];
             document.getElementById('bayarInput').value = '';

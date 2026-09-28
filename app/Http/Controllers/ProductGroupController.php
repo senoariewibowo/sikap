@@ -7,10 +7,21 @@ use Illuminate\Http\Request;
 
 class ProductGroupController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $groups = ProductGroup::withCount('products')->orderBy('group_name')->paginate(10);
-        return view('kasir.group.index', compact('groups'));
+        $sort = $request->get('sort', 'group_name');
+        $order = strtolower($request->get('order', 'asc')) === 'desc' ? 'desc' : 'asc';
+        $allowed = ['group_name', 'description', 'products_count'];
+        if (!in_array($sort, $allowed, true)) {
+            $sort = 'group_name';
+        }
+
+        $groups = ProductGroup::withCount('products')
+            ->orderBy($sort === 'products_count' ? 'products_count' : $sort, $order)
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('kasir.group.index', compact('groups', 'sort', 'order'));
     }
 
     public function create()

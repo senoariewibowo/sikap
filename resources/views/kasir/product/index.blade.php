@@ -4,6 +4,15 @@
 @section('page-title', 'Master Produk Kasir')
 
 @section('content')
+@php
+$sortUrl = fn($column) => request()->fullUrlWithQuery(['sort' => $column, 'order' => ($sort === $column && $order === 'asc' ? 'desc' : 'asc')]);
+$sortIcon = function($column) use ($sort, $order) {
+    if ($sort !== $column) return '';
+    return $order === 'asc'
+        ? '<span class="text-emerald-500 leading-none ml-0.5">↑</span>'
+        : '<span class="text-emerald-500 leading-none ml-0.5">↓</span>';
+};
+@endphp
 <div class="bg-white rounded-lg shadow">
     <div class="p-6 border-b border-gray-200 flex justify-between items-center">
         <div>
@@ -40,13 +49,23 @@
         <table class="w-full text-sm text-left text-gray-500">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                 <tr>
-                    <th class="px-6 py-3">Nama</th>
-                    <th class="px-6 py-3">Barcode</th>
-                    <th class="px-6 py-3">Grup</th>
-                    <th class="px-6 py-3">Modal</th>
-                    <th class="px-6 py-3">Harga Tier</th>
-                    <th class="px-6 py-3">Status</th>
-                    <th class="px-6 py-3">Aksi</th>
+                    <th class="px-6 py-3 whitespace-nowrap">
+                        <a href="{{ $sortUrl('product_name') }}" class="inline-flex items-center gap-1.5 hover:text-emerald-600 whitespace-nowrap">Nama {!! $sortIcon('product_name') !!}</a>
+                    </th>
+                    <th class="px-6 py-3 whitespace-nowrap">
+                        <a href="{{ $sortUrl('barcode') }}" class="inline-flex items-center gap-1.5 hover:text-emerald-600 whitespace-nowrap">Barcode {!! $sortIcon('barcode') !!}</a>
+                    </th>
+                    <th class="px-6 py-3 whitespace-nowrap">
+                        <a href="{{ $sortUrl('group_name') }}" class="inline-flex items-center gap-1.5 hover:text-emerald-600 whitespace-nowrap">Grup {!! $sortIcon('group_name') !!}</a>
+                    </th>
+                    <th class="px-6 py-3 whitespace-nowrap">
+                        <a href="{{ $sortUrl('modal') }}" class="inline-flex items-center gap-1.5 hover:text-emerald-600 whitespace-nowrap">Modal {!! $sortIcon('modal') !!}</a>
+                    </th>
+                    <th class="px-6 py-3 whitespace-nowrap">Harga Tier</th>
+                    <th class="px-6 py-3 whitespace-nowrap">
+                        <a href="{{ $sortUrl('is_active') }}" class="inline-flex items-center gap-1.5 hover:text-emerald-600 whitespace-nowrap">Status {!! $sortIcon('is_active') !!}</a>
+                    </th>
+                    <th class="px-6 py-3 whitespace-nowrap">Aksi</th>
                 </tr>
             </thead>
             <tbody>

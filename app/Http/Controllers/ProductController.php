@@ -12,16 +12,30 @@ class ProductController extends Controller
     {
         $search = $request->get('search');
         $groupId = $request->get('group_id');
+        $sort = $request->get('sort', 'product_name');
+        $order = strtolower($request->get('order', 'asc')) === 'desc' ? 'desc' : 'asc';
+        $allowed = ['product_name', 'barcode', 'group_name', 'modal', 'is_active'];
+        if (!in_array($sort, $allowed, true)) {
+            $sort = 'product_name';
+        }
 
-        $products = Product::with(['group', 'prices'])
+        $query = Product::with(['group', 'prices'])
             ->when($search, fn($q) => $q->where('product_name', 'like', "%{$search}%")
                 ->orWhere('barcode', 'like', "%{$search}%"))
-            ->when($groupId, fn($q) => $q->where('group_id', $groupId))
-            ->orderBy('product_name')->paginate(10)->withQueryString();
+            ->when($groupId, fn($q) => $q->where('group_id', $groupId));
 
+        if ($sort === 'group_name') {
+            $query->leftJoin('product_groups', 'products.group_id', '=', 'product_groups.id')
+                ->orderBy('product_groups.group_name', $order)
+                ->select('products.*');
+        } else {
+            $query->orderBy($sort, $order);
+        }
+
+        $products = $query->paginate(10)->withQueryString();
         $groups = ProductGroup::orderBy('group_name')->get();
 
-        return view('kasir.product.index', compact('products', 'groups', 'search', 'groupId'));
+        return view('kasir.product.index', compact('products', 'groups', 'search', 'groupId', 'sort', 'order'));
     }
 
     public function create()

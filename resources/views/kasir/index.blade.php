@@ -4,6 +4,15 @@
 @section('page-title', 'Riwayat Kasir')
 
 @section('content')
+@php
+$sortUrl = fn($column) => request()->fullUrlWithQuery(['sort' => $column, 'order' => ($sort === $column && $order === 'asc' ? 'desc' : 'asc')]);
+$sortIcon = function($column) use ($sort, $order) {
+    if ($sort !== $column) return '';
+    return $order === 'asc'
+        ? '<span class="text-emerald-500 leading-none ml-0.5">↑</span>'
+        : '<span class="text-emerald-500 leading-none ml-0.5">↓</span>';
+};
+@endphp
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
     <div class="bg-white rounded-lg shadow p-4">
         <p class="text-sm text-gray-500">Total Transaksi</p>
@@ -54,17 +63,37 @@
         <table class="w-full text-sm text-left text-gray-500">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                 <tr>
-                    <th class="px-4 py-3">No. Struk</th>
-                    <th class="px-4 py-3">Tanggal</th>
-                    <th class="px-4 py-3">Pembeli</th>
-                    <th class="px-4 py-3">Kasir</th>
-                    <th class="px-4 py-3">Metode</th>
-                    <th class="px-4 py-3">Status</th>
-                    <th class="px-4 py-3 text-right">Total</th>
-                    <th class="px-4 py-3 text-right">Dibayar</th>
-                    <th class="px-4 py-3 text-right">Kekurangan</th>
-                    <th class="px-4 py-3 text-right">Kembalian</th>
-                    <th class="px-4 py-3">Aksi</th>
+                    <th class="px-4 py-3 whitespace-nowrap">
+                        <a href="{{ $sortUrl('no_struk') }}" class="inline-flex items-center gap-1.5 hover:text-emerald-600 whitespace-nowrap">No. Struk {!! $sortIcon('no_struk') !!}</a>
+                    </th>
+                    <th class="px-4 py-3 whitespace-nowrap">
+                        <a href="{{ $sortUrl('tanggal') }}" class="inline-flex items-center gap-1.5 hover:text-emerald-600 whitespace-nowrap">Tanggal {!! $sortIcon('tanggal') !!}</a>
+                    </th>
+                    <th class="px-4 py-3 whitespace-nowrap">
+                        <a href="{{ $sortUrl('nama_pembeli') }}" class="inline-flex items-center gap-1.5 hover:text-emerald-600 whitespace-nowrap">Pembeli {!! $sortIcon('nama_pembeli') !!}</a>
+                    </th>
+                    <th class="px-4 py-3 whitespace-nowrap">
+                        <a href="{{ $sortUrl('kasir') }}" class="inline-flex items-center gap-1.5 hover:text-emerald-600 whitespace-nowrap">Kasir {!! $sortIcon('kasir') !!}</a>
+                    </th>
+                    <th class="px-4 py-3 whitespace-nowrap">
+                        <a href="{{ $sortUrl('metode_pembayaran') }}" class="inline-flex items-center gap-1.5 hover:text-emerald-600 whitespace-nowrap">Metode {!! $sortIcon('metode_pembayaran') !!}</a>
+                    </th>
+                    <th class="px-4 py-3 whitespace-nowrap">
+                        <a href="{{ $sortUrl('status_pembayaran') }}" class="inline-flex items-center gap-1.5 hover:text-emerald-600 whitespace-nowrap">Status {!! $sortIcon('status_pembayaran') !!}</a>
+                    </th>
+                    <th class="px-4 py-3 text-right whitespace-nowrap">
+                        <a href="{{ $sortUrl('total') }}" class="inline-flex items-center justify-end gap-1.5 hover:text-emerald-600 whitespace-nowrap w-full">Total {!! $sortIcon('total') !!}</a>
+                    </th>
+                    <th class="px-4 py-3 text-right whitespace-nowrap">
+                        <a href="{{ $sortUrl('dp') }}" class="inline-flex items-center justify-end gap-1.5 hover:text-emerald-600 whitespace-nowrap w-full">Dibayar {!! $sortIcon('dp') !!}</a>
+                    </th>
+                    <th class="px-4 py-3 text-right whitespace-nowrap">
+                        <a href="{{ $sortUrl('kekurangan') }}" class="inline-flex items-center justify-end gap-1.5 hover:text-emerald-600 whitespace-nowrap w-full">Kekurangan {!! $sortIcon('kekurangan') !!}</a>
+                    </th>
+                    <th class="px-4 py-3 text-right whitespace-nowrap">
+                        <a href="{{ $sortUrl('kembalian') }}" class="inline-flex items-center justify-end gap-1.5 hover:text-emerald-600 whitespace-nowrap w-full">Kembalian {!! $sortIcon('kembalian') !!}</a>
+                    </th>
+                    <th class="px-4 py-3 whitespace-nowrap">Aksi</th>
                 </tr>
             </thead>
             <tbody>

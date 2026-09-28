@@ -4,6 +4,15 @@
 @section('page-title', 'Grup Produk')
 
 @section('content')
+@php
+$sortUrl = fn($column) => request()->fullUrlWithQuery(['sort' => $column, 'order' => ($sort === $column && $order === 'asc' ? 'desc' : 'asc')]);
+$sortIcon = function($column) use ($sort, $order) {
+    if ($sort !== $column) return '';
+    return $order === 'asc'
+        ? '<span class="text-emerald-500 leading-none ml-0.5">↑</span>'
+        : '<span class="text-emerald-500 leading-none ml-0.5">↓</span>';
+};
+@endphp
 <div class="bg-white rounded-lg shadow">
     <div class="p-6 border-b border-gray-200 flex justify-between items-center">
         <h2 class="text-lg font-semibold text-gray-800">Daftar Grup Produk</h2>
@@ -14,10 +23,16 @@
         <table class="w-full text-sm text-left text-gray-500">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                 <tr>
-                    <th class="px-6 py-3">Nama Grup</th>
-                    <th class="px-6 py-3">Deskripsi</th>
-                    <th class="px-6 py-3">Jumlah Produk</th>
-                    <th class="px-6 py-3">Aksi</th>
+                    <th class="px-6 py-3 whitespace-nowrap">
+                        <a href="{{ $sortUrl('group_name') }}" class="inline-flex items-center gap-1.5 hover:text-emerald-600 whitespace-nowrap">Nama Grup {!! $sortIcon('group_name') !!}</a>
+                    </th>
+                    <th class="px-6 py-3 whitespace-nowrap">
+                        <a href="{{ $sortUrl('description') }}" class="inline-flex items-center gap-1.5 hover:text-emerald-600 whitespace-nowrap">Deskripsi {!! $sortIcon('description') !!}</a>
+                    </th>
+                    <th class="px-6 py-3 whitespace-nowrap">
+                        <a href="{{ $sortUrl('products_count') }}" class="inline-flex items-center gap-1.5 hover:text-emerald-600 whitespace-nowrap">Jumlah Produk {!! $sortIcon('products_count') !!}</a>
+                    </th>
+                    <th class="px-6 py-3 whitespace-nowrap">Aksi</th>
                 </tr>
             </thead>
             <tbody>
